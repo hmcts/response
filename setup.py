@@ -3,11 +3,11 @@ from os import path
 
 from setuptools import find_packages, setup
 
-VERSION = "0.0.3"
+VERSION = "0.0.4-alpha"
 
 INSTALL_REQUIRES = [
     "Django==5.0.6",
-    "bleach==6.10",
+    "bleach==6.1.0",
     "bleach-whitelist>=0.0.11",
     "cryptography>=42.0.8",
     "django-after-response>=0.2.2",
