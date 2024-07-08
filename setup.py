@@ -6,18 +6,18 @@ from setuptools import find_packages, setup
 VERSION = "0.0.3"
 
 INSTALL_REQUIRES = [
-    "Django>=2.2.9,<3",
-    "bleach==3.1.4",
-    "bleach-whitelist>=0.0.10",
-    "cryptography>=2.7",
+    "Django==5.0.6",
+    "bleach==6.10",
+    "bleach-whitelist>=0.0.11",
+    "cryptography>=42.0.8",
     "django-after-response>=0.2.2",
-    "django-bootstrap4>=0.0.7",
-    "djangorestframework>=3.9.2",
-    "emoji-data-python==1.1.0",
-    "jsonfield>=2.0.2",
-    "markdown2>=2.3.7",
-    "python-slugify>=1.2.6",
-    "slackclient>=1.3,<2",
+    "django-bootstrap4>=24.3",
+    "djangorestframework>=3.15.2",
+    "emoji-data-python==1.5.0",
+    "jsonfield>=3.1.0",
+    "markdown2>=2.4.13",
+    "python-slugify>=8.0.4",
+    "slackclient>=2.9.4",
 ]
 
 # allow setup.py to be run from any path
