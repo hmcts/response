@@ -30,7 +30,7 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 
 setup(
-    name="django-incident-response",
+    name="hmcts-response",
     version=VERSION,
     long_description=long_description,
     long_description_content_type="text/markdown",
