@@ -30,7 +30,7 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 
 setup(
-    name="hmcts-response",
+    name="response",
     version=VERSION,
     long_description=long_description,
     long_description_content_type="text/markdown",
