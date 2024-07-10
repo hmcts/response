@@ -3,7 +3,7 @@ from os import path
 
 from setuptools import find_packages, setup
 
-VERSION = "0.0.5rc6"
+VERSION = "0.0.1"
 
 INSTALL_REQUIRES = [
     "Django>=2.2.9,<3",
@@ -11,13 +11,13 @@ INSTALL_REQUIRES = [
     "bleach-whitelist>=0.0.11",
     "cryptography>=42.0.8",
     "django-after-response>=0.2.2",
-    "django-bootstrap4>=21.2",
+    "django-bootstrap4>=22.1",
     "djangorestframework>=3.13.1",
     "emoji-data-python==1.5.0",
     "jsonfield>=3.1.0",
     "markdown2>=2.4.13",
     "python-slugify>=8.0.4",
-    "slackclient>=1.3.1",
+    "slackclient>=1.3,<2",
 ]
 
 # allow setup.py to be run from any path
@@ -41,8 +41,8 @@ setup(
     include_package_data=True,
     license="MIT License",  # example license
     description="A real-time incident response and reporting tool",
-    url="https://github.com/monzo/response",
-    author="Chris Evans",
+    url="https://github.com/hmcts/response",
+    author="Enda Kelly",
     classifiers=[
         "Environment :: Web Environment",
         "Framework :: Django",
