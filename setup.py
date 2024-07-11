@@ -7,7 +7,7 @@ VERSION = "0.0.1"
 
 INSTALL_REQUIRES = [
     "Django>=2.2.9,<3",
-    "bleach==6.1.0",
+    "bleach==4.0.0",
     "bleach-whitelist>=0.0.11",
     "cryptography>=42.0.8",
     "django-after-response>=0.2.2",
