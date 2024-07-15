@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 VERSION = "0.0.1"
 
 INSTALL_REQUIRES = [
-    "Django>=2.2.9,<3",
+    "Django>=2.2.9,<4",
     "bleach==4.0.0",
     "bleach-whitelist>=0.0.11",
     "cryptography>=42.0.8",
