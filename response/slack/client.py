@@ -1,7 +1,8 @@
 import logging
 import time
 
-import slackclient
+import slack_sdk
+import os
 from slugify import slugify
 
 logger = logging.getLogger(__name__)
@@ -22,52 +23,17 @@ class SlackClient(object):
         retryable_errors=None,
     ):
         self.api_token = api_token
-        self.client = slackclient.SlackClient(self.api_token)
+        self.client = slack_sdk.WebClient(os.environ["SLACK_TOKEN"], timeout=30)
         self.max_retry_attempts = max_retry_attempts
         self.retry_base_backoff_seconds = retry_base_backoff_seconds
         self.retryable_errors = retryable_errors or ["ratelimited"]
 
-    def api_call(self, api_endpoint, *args, **kwargs):
-        logger.info(f"Calling Slack API {api_endpoint}")
-        response = self.client.api_call(api_endpoint, *args, **kwargs)
-        if not response.get("ok", False):
-            error = response.get("error", "<no error given>")
-
-            # Check if we want to back off and retry (but only if this isn't a
-            # retry attempt itself)
-            if error in self.retryable_errors and not kwargs.get("is_retrying", False):
-                # Iterate over retry attempts. We could implement this
-                # recursively, but there's a danger of overflowing the stack
-
-                # Start index at 1 so we have a multiplier for backoff
-                for i in range(1, self.max_retry_attempts + 1):
-                    try:
-                        # Increase backoff with every attempt
-                        backoff_seconds = self.retry_base_backoff_seconds * i
-                        logging.warning(
-                            f"Retrying request to {api_endpoint} after error {error}. Backing off {backoff_seconds:.2f}s (attempt {i} of {self.max_retry_attempts})"
-                        )
-
-                        time.sleep(backoff_seconds)
-                        return self.api_call(
-                            api_endpoint, is_retrying=True, *args, **kwargs
-                        )
-                    except SlackError as exc:
-                        if exc.slack_error not in self.retryable_errors:
-                            raise exc
-
-            raise SlackError(
-                f"Error calling Slack API endpoint '{api_endpoint}': {error}",
-                slack_error=error,
-            )
-        return response
-
     def users_list(self):
         logger.info("Listing Slack users")
-        return self.api_call("users.list")
+        return self.client.users_list(self)
 
     def get_paginated_users(self, limit=0, cursor=None):
-        response = self.api_call("users.list", limit=limit, cursor=cursor)
+        response = self.client.users_list(limit=limit, cursor=cursor)
         return response
 
     def get_user_id(self, name):
@@ -80,7 +46,7 @@ class SlackClient(object):
 
     def get_channel_name(self, id_):
         try:
-            response = self.api_call("conversations.info", channel=id_)
+            response = self.client.conversations_info(channel=id_)
             return response["channel"]["name"]
         except SlackError as e:
             if e.slack_error == "channel_not_found":
@@ -92,8 +58,7 @@ class SlackClient(object):
         next_cursor = None
 
         while next_cursor != "":
-            response = self.api_call(
-                "conversations.list",
+            response = self.client.conversations_list(                
                 exclude_archived=not auto_unarchive,
                 exclude_members=True,
                 limit=800,
@@ -118,7 +83,7 @@ class SlackClient(object):
         raise SlackError(f"Channel '{name}' not found")
 
     def get_usergroup_id(self, group_handle):
-        response = self.api_call("usergroups.list")
+        response = self.client.usergroups_list()
         if not response.get("ok", False):
             raise SlackError(
                 f"Failed to get usergroup with group handle {group_handle} : {response['error']}"
@@ -129,7 +94,7 @@ class SlackClient(object):
         return None
 
     def get_usergroup_users(self, group_id):
-        response = self.api_call("usergroups.list", include_users=True)
+        response = self.client.usergroups_list(include_users=True)
 
         if not response.get("ok", False):
             raise SlackError(
@@ -141,7 +106,7 @@ class SlackClient(object):
         return None
 
     def create_channel(self, name):
-        response = self.api_call("conversations.create", name=name)
+        response = self.client.conversations_create(name=name)
         try:
             return response["channel"]["id"]
         except KeyError:
@@ -160,18 +125,15 @@ class SlackClient(object):
             return self.get_channel_id(channel_name, auto_unarchive)
 
     def set_channel_topic(self, channel_id, channel_topic):
-        return self.api_call(
-            "conversations.setTopic", channel=channel_id, topic=channel_topic
-        )
+        return self.client.conversations_setTopic(channel=channel_id, topic=channel_topic)
 
     def unarchive_channel(self, channel_id):
-        response = self.api_call("conversations.unarchive", channel=channel_id)
+        response = self.client.conversations_unarchive(channel=channel_id)
         if not response.get("ok", False):
             raise SlackError(f"Couldn't unarchive channel {channel_id}")
 
     def send_message(self, channel_id, text, attachments=None, thread_ts=None):
-        return self.api_call(
-            "chat.postMessage",
+        return self.client.chat_postMessage(
             channel=channel_id,
             text=text,
             attachments=attachments,
@@ -179,8 +141,7 @@ class SlackClient(object):
         )
 
     def send_ephemeral_message(self, channel_id, user_id, text, attachments=None):
-        return self.api_call(
-            "chat.postEphemeral",
+        return self.client.chat_postEphemeral(
             channel=channel_id,
             text=text,
             user=user_id,
@@ -188,16 +149,19 @@ class SlackClient(object):
         )
 
     def send_or_update_message_block(self, channel_id, blocks, fallback_text, ts=None):
-        api_call = "chat.postMessage" if not ts else "chat.update"
-
-        return self.api_call(
-            api_call, text=fallback_text, channel=channel_id, ts=ts, blocks=blocks
+        if not ts:
+            return self.client.chat_postMessage(
+                text=fallback_text, channel=channel_id, ts=ts, blocks=blocks
+            )
+        else:
+            return self.client.chat_update(
+                text=fallback_text, channel=channel_id, ts=ts, blocks=blocks
         )
 
     def add_reaction(self, reaction, channel_id, thread_ts):
         try:
-            return self.api_call(
-                "reactions.add", name=reaction, channel=channel_id, timestamp=thread_ts
+            return self.client.reactions_add(
+                name=reaction, channel=channel_id, timestamp=thread_ts
             )
         except SlackError as e:
             if e.slack_error != "already_reacted":
@@ -205,8 +169,7 @@ class SlackClient(object):
 
     def remove_reaction(self, reaction, channel_id, thread_ts):
         try:
-            return self.api_call(
-                "reactions.remove",
+            return self.client.reactions_remove(
                 name=reaction,
                 channel=channel_id,
                 timestamp=thread_ts,
@@ -220,28 +183,26 @@ class SlackClient(object):
         return the id of the user associated with the current slack token
         """
         try:
-            return self.api_call("auth.test")["user_id"]
+            return self.client.auth_test()["user_id"]
         except KeyError:
             raise SlackError(
                 "Got unexpected response from Slack API for auth.test - couldn't find user_id key"
             )
 
     def invite_user_to_channel(self, user_id, channel_id):
-        return self.api_call(
-            "conversations.invite", users=[user_id], channel=channel_id
-        )
+        return self.client.conversations_invite(channel=channel_id, users=user_id)
 
     def join_channel(self, channel_id):
-        return self.api_call("conversations.join", channel=channel_id)
+        return self.client.conversations_join(channel=channel_id)
 
     def leave_channel(self, channel_id):
-        return self.api_call("conversations.leave", channel=channel_id)
+        return self.client.conversations_leave(channel=channel_id)
 
     def get_user_profile(self, user_id):
         if not user_id:
             return None
 
-        response = self.api_call("users.info", user=user_id)
+        response = self.client.users_info(user=user_id)
 
         return {
             "id": user_id,
@@ -255,7 +216,7 @@ class SlackClient(object):
         if not email:
             return None
 
-        response = self.api_call("users.lookupByEmail", email=email)
+        response = self.client.users_lookupByEmail(email=email)
 
         return {
             "id": response["user"]["id"],
@@ -271,8 +232,8 @@ class SlackClient(object):
             prefix = "inc-"
 
         new_name = slugify(f"{prefix}{new_name}", max_length=80)
-
-        return self.api_call("conversations.rename", channel=channel_id, name=new_name)
+        
+        return self.client.conversations_rename(channel=channel_id, name=new_name)
 
     def dialog_open(self, dialog, trigger_id):
-        return self.api_call("dialog.open", trigger_id=trigger_id, dialog=dialog)
+        return self.client.dialog_open(trigger_id=trigger_id, dialog=dialog)
