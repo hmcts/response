@@ -31,14 +31,12 @@ jobs:
           pip install astor
 
       - name: Run bump-version script
-        run: python ./scripts/bump-version.py
-
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v44
+        run: |
+          export SCRIPT_OUTPUT=$)python ./scripts/bump-version.py)
+          echo "SCRIPT_OUTPUT=$SCRIPT_OUTPUT" >> $GITHUB_ENV
 
       - name: Commit changes
-        if: steps.changed-files.outputs.any_changed == 'true'
+        if: ${{ env.SCRIPT_OUTPUT }} == "version_updated"
         run: |
           git config user.name hmcts-platform-operations
           git config user.email github-platform-operations@hmcts.net

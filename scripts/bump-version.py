@@ -13,5 +13,13 @@ new_version = os.environ["NEW_VERSION"]
 with fileinput.FileInput(setup_file_path, inplace=True) as file:
     for line in file:
         if line.startswith("VERSION"):
+            old_version = line.split("'")[1]
             line = f"VERSION = '{new_version}'\n"
         print(line, end='')
+
+    if old_version != new_version:
+        print(f"version_updated")
+    else:
+        print(f"version_unchanged")
+
+
