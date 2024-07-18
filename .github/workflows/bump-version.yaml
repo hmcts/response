@@ -32,7 +32,7 @@ jobs:
 
       - name: Run bump-version script
         run: |
-          export SCRIPT_OUTPUT=$(python ./scripts/bump-version.py) >> $GITHUB_ENV
+          echo SCRIPT_OUTPUT=$(python ./scripts/bump-version.py) >> $GITHUB_ENV
           echo $SCRIPT_OUTPUT
 
       - name: Commit changes
