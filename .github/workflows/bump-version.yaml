@@ -28,13 +28,15 @@ jobs:
         env:
           GITHUB_RELEASE_TAG: ${{ NEW_VERSION }}
 
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+
       - name: Commit changes
+        if: contains(steps.changed-files.outputs.modified_files, 'setup.py')
         run: |
           git config user.name hmcts-platform-operations
           git config user.email github-platform-operations@hmcts.net
           git add .
           git commit -m bump-version
           git push
-          commit_tree_url=$(gh browse -c -n)
-          commit_url=${commit_tree_url/tree/commit}
-          echo "COMMIT_URL=$(echo $commit_url)" >> $GITHUB_ENV
