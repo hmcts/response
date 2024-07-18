@@ -7,7 +7,7 @@ import os
 setup_file_path = "setup.py"
 
 # New version value
-new_version = os.environ["GITHUB_RELEASE_TAG"]
+new_version = os.environ["NEW_VERSION"]
 
 # Update the value of VERSION in the file
 with fileinput.FileInput(setup_file_path, inplace=True) as file:
