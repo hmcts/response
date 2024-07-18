@@ -32,8 +32,8 @@ jobs:
 
       - name: Run bump-version script
         run: |
-          export SCRIPT_OUTPUT=$(python ./scripts/bump-version.py)
-          echo "SCRIPT_OUTPUT=$SCRIPT_OUTPUT" >> $GITHUB_ENV
+          export SCRIPT_OUTPUT=$(python ./scripts/bump-version.py) >> $GITHUB_ENV
+          echo $SCRIPT_OUTPUT
 
       - name: Commit changes
         if: ${{ env.SCRIPT_OUTPUT }} == "version_updated"
