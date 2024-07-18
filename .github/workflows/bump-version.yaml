@@ -1,4 +1,4 @@
-name: Release Drafter
+name: Bump version
 
 on:
   pull_request:
@@ -26,7 +26,7 @@ jobs:
       - name: Run bump-version script
         run: python bump-version.py
         env:
-          GITHUB_RELEASE_TAG: ${{ NEW_VERSION }}
+          GITHUB_RELEASE_TAG: ${{ env.NEW_VERSION }}
 
       - name: Get changed files
         id: changed-files
