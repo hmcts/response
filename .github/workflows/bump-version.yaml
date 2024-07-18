@@ -12,7 +12,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: '0'
-          token: ${{ env.GH_TOKEN }}
           ref: ${{ github.head_ref }}
 
       - name: Get latest release tag
