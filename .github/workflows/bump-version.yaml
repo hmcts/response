@@ -23,6 +23,10 @@ jobs:
           new_version="$major.$minor.$new_patch"
           echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
 
+      - name: Install packages
+        run: |
+          pip install ast astor
+
       - name: Run bump-version script
         run: python ./scripts/bump-version.py
         env:
