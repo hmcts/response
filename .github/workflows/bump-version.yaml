@@ -1,0 +1,40 @@
+name: Release Drafter
+
+on:
+  pull_request:
+
+jobs:
+  bump_version:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get latest release tag
+        run: |
+          git fetch --tags
+          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          version_parts=(${latest_tag//./ })
+          major=${version_parts[0]}
+          minor=${version_parts[1]}
+          patch=${version_parts[2]}
+          new_patch=$((patch + 1))
+          new_version="$major.$minor.$new_patch"
+          echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
+
+      - name: Run bump-version script
+        run: python bump-version.py
+        env:
+          GITHUB_RELEASE_TAG: ${{ NEW_VERSION }}
+
+      - name: Commit changes
+        run: |
+          git config user.name hmcts-platform-operations
+          git config user.email github-platform-operations@hmcts.net
+          git add .
+          git commit -m bump-version
+          git push
+          commit_tree_url=$(gh browse -c -n)
+          commit_url=${commit_tree_url/tree/commit}
+          echo "COMMIT_URL=$(echo $commit_url)" >> $GITHUB_ENV
