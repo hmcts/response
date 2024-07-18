@@ -24,7 +24,7 @@ jobs:
           echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
 
       - name: Run bump-version script
-        run: python bump-version.py
+        run: python ./scripts/bump-version.py
         env:
           GITHUB_RELEASE_TAG: ${{ env.NEW_VERSION }}
 
