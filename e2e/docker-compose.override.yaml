@@ -1,7 +1,7 @@
 version: '3'
 services:
   e2e-test:
-    image: python:3.7
+    image: python:3.12
     volumes:
       - $PWD:/usr/src/response
     working_dir: /usr/src/response/e2e
