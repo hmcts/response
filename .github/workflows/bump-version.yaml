@@ -2,6 +2,9 @@ name: Bump version
 
 on:
   pull_request:
+    paths:
+      - 'response/**'
+      - 'setup.py'
 
 jobs:
   bump_version:
