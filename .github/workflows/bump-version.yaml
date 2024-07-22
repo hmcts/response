@@ -2,6 +2,8 @@ name: Bump version
 
 on:
   pull_request:
+    paths:
+      - '**.py'
 
 jobs:
   bump_version:
