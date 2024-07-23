@@ -13,7 +13,7 @@ INSTALL_REQUIRES = [
     "django-after-response>=0.2.2",
     "django-bootstrap4>=24.3",
     "djangorestframework>=3.15.2",
-    "emoji-data-python==1.5.0",
+    "emoji-data-python==1.6.0",
     "jsonfield>=3.1.0",
     "markdown2>=2.5.0",
     "python-slugify>=8.0.4",
