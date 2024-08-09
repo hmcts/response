@@ -35,7 +35,7 @@ services:
     tty: true
 
   db:
-    image: "postgres:14.12"
+    image: "postgres:14.13"
     container_name: postgres
     env_file: .env
     volumes:
