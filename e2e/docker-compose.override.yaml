@@ -1,7 +1,7 @@
-version: '3'
+version: "3"
 services:
   e2e-test:
-    image: python:3.7
+    image: python:3.13
     volumes:
       - $PWD:/usr/src/response
     working_dir: /usr/src/response/e2e
@@ -13,4 +13,3 @@ services:
       - RESPONSE_ADDR=http://response:8000
     env_file: .env
     tty: true
-
